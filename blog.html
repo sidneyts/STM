@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STM - Portfólio de Motion</title>
+    <title>Blog - STM</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,25 +13,25 @@
 </head>
 <body>
 
-    <!-- Cabeçalho -->
+    <!-- Cabeçalho (igual ao da página inicial) -->
     <header class="header">
         <div class="container header-container">
-            <a href="#">
+            <a href="index.html">
                 <img src="images/logostm.png" alt="Logo STM" class="logo">
             </a>
             
             <nav class="main-nav">
-                <a href="#portfolio" class="nav-link">Portfólio</a>
-                <a href="#sobre" class="nav-link">Sobre</a>
+                <a href="index.html#portfolio" class="nav-link">Portfólio</a>
+                <a href="index.html#sobre" class="nav-link">Sobre</a>
                 <a href="blog.html" class="nav-link">Blog</a>
-                <a href="#contato" class="nav-link">Contato</a>
+                <a href="index.html#contato" class="nav-link">Contato</a>
             </nav>
 
             <div class="theme-switch-wrapper">
                 <label class="theme-switch" for="theme-toggle">
                     <input type="checkbox" id="theme-toggle" />
                     <div class="slider">
-                        <div class="slider-icon sun"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+                         <div class="slider-icon sun"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
                         <div class="slider-icon moon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
                     </div>
                 </label>
@@ -43,49 +43,23 @@
         </div>
     </header>
 
-    <!-- Conteúdo Principal -->
+    <!-- Conteúdo Principal do Blog -->
     <main>
-        <section id="hero" class="hero-section">
-            <div class="container text-center">
-                <h1 class="hero-title">Motion Design</h1>
-                <p class="hero-subtitle">A arte de dar vida às suas ideias através de movimento.</p>
-            </div>
-        </section>
-
-        <section id="portfolio" class="portfolio-section">
+        <section class="blog-page-section">
             <div class="container">
-                <h2 class="section-title">Projetos Recentes</h2>
-                <div class="video-grid">
-                    <div class="video-item"><video src="videos/video1.mp4" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/1e1f22/ebe7d9?text=Carregando..."></video></div>
-                    <div class="video-item"><video src="videos/video2.mp4" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/1e1f22/ebe7d9?text=Carregando..."></video></div>
-                    <div class="video-item"><video src="videos/video3.mp4" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/1e1f22/ebe7d9?text=Carregando..."></video></div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="sobre" class="about-section">
-            <div class="container text-center">
-                <h2 class="section-title">Sobre Mim</h2>
-                <p class="section-subtitle">
-                    Sou um motion designer apaixonado por contar histórias e criar experiências visuais impactantes. Com foco em tecnologia, jogos e cinema, busco sempre inovar e trazer novas perspectivas para cada projeto.
-                </p>
-            </div>
-        </section>
-
-        <!-- Seção do Blog Atualizada -->
-        <section id="blog" class="blog-section">
-            <div class="container">
-                <h2 class="section-title text-center">Fique por dentro</h2>
-                <p class="section-subtitle text-center">Minhas últimas notícias e artigos sobre o universo criativo.</p>
+                <h1 class="section-title text-center">Últimas Notícias</h1>
+                <p class="section-subtitle text-center">Novidades sobre tecnologia, jogos, cinema e o universo do motion design.</p>
                 
                 <div class="blog-grid">
+
                     <!-- Post 1 -->
                     <a href="post1.html" class="blog-card">
                         <img src="https://layerlemonade.com/wp-content/uploads/2024/02/stopmotion-sites-layer-lemonade-destaque-1.jpg" alt="Homem de argila olhando para a câmera" class="blog-card-image">
                         <div class="blog-card-content">
                             <span class="blog-card-tag">Animação</span>
                             <h3 class="blog-card-title">3 sites para quem quer se aventurar no mundo do Stop Motion</h3>
-                            <p class="blog-card-excerpt">Descubra três sites incríveis e gratuitos que são essenciais para animadores de stop motion...</p>
+                            <p class="blog-card-excerpt">Descubra três sites incríveis e gratuitos que são essenciais para animadores de stop motion, oferecendo desde softwares de edição a comunidades e recursos de aprendizado.</p>
+                            <span class="blog-card-cta">Leia mais &rarr;</span>
                         </div>
                     </a>
 
@@ -95,7 +69,8 @@
                         <div class="blog-card-content">
                             <span class="blog-card-tag">Tecnologia</span>
                             <h3 class="blog-card-title">Adobe Photoshop Beta e sua nova ferramenta de IA</h3>
-                            <p class="blog-card-excerpt">A nova função 'Generative Fill' do Adobe Photoshop (Beta) utiliza inteligência artificial...</p>
+                            <p class="blog-card-excerpt">A nova função 'Generative Fill' do Adobe Photoshop (Beta) utiliza inteligência artificial para permitir a criação e remoção de elementos em imagens de forma intuitiva e revolucionária.</p>
+                             <span class="blog-card-cta">Leia mais &rarr;</span>
                         </div>
                     </a>
 
@@ -103,22 +78,19 @@
                     <a href="post3.html" class="blog-card">
                         <img src="https://layerlemonade.com/wp-content/uploads/2023/10/ia-mercado-animacao-destaque.jpg" alt="Robô humanoide desenhando em um tablet" class="blog-card-image">
                         <div class="blog-card-content">
-                             <span class="blog-card-tag">Mercado</span>
+                            <span class="blog-card-tag">Mercado</span>
                             <h3 class="blog-card-title">IA impulsiona o mercado de animação até 2030</h3>
-                            <p class="blog-card-excerpt">A inteligência artificial está transformando a indústria da animação, com projeções indicando...</p>
+                            <p class="blog-card-excerpt">A inteligência artificial está transformando a indústria da animação, com projeções indicando um crescimento de mercado para US$ 587 bilhões até 2030, otimizando processos e expandindo a criatividade.</p>
+                             <span class="blog-card-cta">Leia mais &rarr;</span>
                         </div>
                     </a>
-                </div>
 
-                <div class="text-center">
-                    <a href="blog.html" class="btn">Ver todas as notícias</a>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <!-- Rodapé -->
+    <!-- Rodapé (igual ao da página inicial) -->
     <footer id="contato" class="footer">
         <div class="container text-center">
             <p class="copyright">&copy; 2024 STM. Todos os direitos reservados.</p>
@@ -133,4 +105,3 @@
     <script src="js/script.js"></script>
 </body>
 </html>
-
