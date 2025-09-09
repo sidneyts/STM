@@ -2,13 +2,30 @@
 /* Reset e Variáveis   */
 /* ------------------- */
 :root {
-    --bg-color: #111827;
-    --surface-color: #1F2937;
-    --text-primary: #F9FAFB;
-    --text-secondary: #9CA3AF;
-    --accent-color: #38BDF8; /* Um azul claro como cor de destaque */
+    /* Paleta de Cores (Tema Escuro - Padrão) */
+    --bg-color: #1e1f22;
+    --surface-color: #2a2b2e; /* Um tom ligeiramente mais claro que o fundo */
+    --text-primary: #ebe7d9;
+    --text-secondary: rgba(235, 231, 217, 0.7);
+    --accent-primary: #f2513a; /* Laranja */
+    --accent-secondary: #30fc9f; /* Verde */
+    --accent-tertiary: #1f52a6; /* Azul */
+
     --font-family: 'Inter', sans-serif;
     --header-height: 80px;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        /* Paleta de Cores (Tema Claro) */
+        --bg-color: #ebe7d9;
+        --surface-color: #ffffff;
+        --text-primary: #1e1f22;
+        --text-secondary: rgba(30, 31, 34, 0.7);
+        --accent-primary: #f2513a;
+        --accent-secondary: #1f52a6; /* Azul tem melhor contraste no claro */
+        --accent-tertiary: #1f52a6;
+    }
 }
 
 * {
@@ -26,6 +43,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -42,7 +60,7 @@ body {
 /* Cabeçalho e Navegação */
 /* ------------------- */
 .header {
-    background-color: rgba(17, 24, 39, 0.8);
+    background-color: rgba(30, 31, 34, 0.7); /* Usando a cor base para transparência */
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--surface-color);
     position: sticky;
@@ -75,7 +93,7 @@ body {
 }
 
 .nav-link:hover {
-    color: var(--text-primary);
+    color: var(--accent-primary);
 }
 
 .mobile-nav-toggle {
@@ -98,6 +116,7 @@ body {
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 2px;
+    color: var(--text-primary);
 }
 
 .hero-subtitle {
@@ -117,6 +136,7 @@ body {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
+    color: var(--text-primary);
 }
 
 .section-subtitle {
@@ -151,18 +171,20 @@ body {
 /* Botão */
 .btn {
     display: inline-block;
-    background-color: var(--text-primary);
-    color: var(--bg-color);
+    background-color: var(--accent-primary);
+    color: #fff; /* Branco para garantir contraste com o laranja */
     padding: 0.8rem 2rem;
     border-radius: 5px;
     text-decoration: none;
     font-weight: bold;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background-color 0.3s ease;
     margin-top: 2rem;
+    border: none;
 }
 
 .btn:hover {
     transform: scale(1.05);
+    background-color: var(--accent-secondary);
 }
 
 /* ------------------- */
@@ -193,7 +215,7 @@ body {
 }
 
 .social-links a:hover {
-    color: var(--text-primary);
+    color: var(--accent-primary);
 }
 
 /* ------------------- */
@@ -261,5 +283,5 @@ body {
      .main-nav.active ~ .mobile-nav-toggle .hamburger::after {
         opacity: 0;
     }
-
 }
+
