@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- O título será atualizado dinamicamente -->
+    <title>Carregando... - STM Blog</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Cabeçalho -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html"><img src="images/logostm.png" alt="Logo STM" class="logo"></a>
+            <nav class="main-nav">
+                <a href="index.html#portfolio" class="nav-link">Portfólio</a>
+                <a href="index.html#sobre" class="nav-link">Sobre</a>
+                <a href="blog.html" class="nav-link">Blog</a>
+                <a href="index.html#contato" class="nav-link">Contato</a>
+            </nav>
+            <button class="mobile-nav-toggle" aria-label="Abrir menu"><span class="hamburger"></span></button>
+        </div>
+    </header>
+
+    <main>
+        <article class="post-article">
+            
+            <!-- O Header do Post será preenchido dinamicamente -->
+            <header class="post-header" id="post-header-container">
+                <div class="container">
+                    <a href="blog.html" class="post-back-link">&larr; Voltar para o blog</a>
+                    <h1 class="post-title" id="post-title">Carregando...</h1>
+                    <p class="post-meta" id="post-meta"></p>
+                </div>
+            </header>
+
+            <!-- A Imagem do Post será preenchida dinamicamente -->
+            <div class="post-image-container" id="post-image-container">
+                 <!-- O <img> será inserido aqui via JS -->
+            </div>
+
+            <!-- O Conteúdo do Post será preenchido dinamicamente -->
+            <div class="container post-content" id="post-content-container">
+                <p>Carregando conteúdo do post...</p>
+            </div>
+        </article>
+    </main>
+
+    <!-- Rodapé -->
+    <footer id="contato" class="footer">
+        <div class="container text-center">
+            <p class="copyright">&copy; 2025 STM. Todos os direitos reservados.</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/sidneytsilva_/" target="_blank">Instagram</a>
+                <a href="https://www.linkedin.com/in/sidneytsilva" target="_blank">LinkedIn</a>
+                <a href="https://www.behance.net/sidneyteixeir1" target="_blank">Behance</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botão Flutuante de Tema -->
+    <div class="floating-theme-switch">
+        <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <div class="slider">
+                <div class="slider-icon sun"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+                <div class="slider-icon moon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
+            </div>
+        </label>
+    </div>
+
+    <!-- Scripts do Firebase para carregar o post -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuração do Firebase ---
+        // COLE SEU FIREBASE CONFIG AQUI
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFpllBhQW_jzj5u1og3fuX3Q3AZGX-_0w",
+            authDomain: "stmotion-9f307.firebaseapp.com",
+            projectId: "stmotion-9f307",
+            storageBucket: "stmotion-9f307.firebasestorage.app",
+            messagingSenderId: "529387031585",
+            appId: "1:529387031585:web:e05111eaa4435e3be92760",
+            measurementId: "G-JC7EGJXP1T"
+        };
+
+        // --- Variáveis Globais (Fornecidas pelo Ambiente) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const fbConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+
+        let db;
+        let dbPath;
+
+        // --- Função para Carregar o Post Individual ---
+        async function loadPost() {
+            // 1. Encontrar os elementos do DOM
+            const titleElement = document.getElementById('post-title');
+            const metaElement = document.getElementById('post-meta');
+            const imageContainer = document.getElementById('post-image-container');
+            const contentContainer = document.getElementById('post-content-container');
+            
+            const showError = (message) => {
+                if(titleElement) titleElement.textContent = "Erro";
+                if(contentContainer) contentContainer.innerHTML = `<p class="text-center">${message}</p>`;
+                if(imageContainer) imageContainer.innerHTML = '';
+            };
+
+            try {
+                // 2. Pegar o ID do post da URL
+                const params = new URLSearchParams(window.location.search);
+                const postId = params.get('id');
+
+                if (!postId) {
+                    showError("Nenhum ID de post fornecido.");
+                    return;
+                }
+
+                // 3. Inicializar Firebase
+                const configToUse = fbConfigString ? JSON.parse(fbConfigString) : firebaseConfig;
+                if (!configToUse.apiKey) {
+                    showError("Erro: Configuração do Firebase não encontrada.");
+                    return;
+                }
+                
+                const app = initializeApp(configToUse);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+                setLogLevel('Debug');
+
+                // 4. Autenticar
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                const userId = auth.currentUser?.uid || crypto.randomUUID();
+                dbPath = `artifacts/${appId}/public/data/posts`;
+
+                // 5. Buscar o documento específico
+                const docRef = doc(db, dbPath, postId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const post = docSnap.data();
+
+                    // 6. Preencher a página com os dados
+                    
+                    // Atualizar o título da aba do navegador
+                    document.title = `${post.title} - STM Blog`;
+                    
+                    // Preencher Título e Meta
+                    titleElement.textContent = post.title;
+                    
+                    let postDate = "Data não disponível";
+                    if (post.createdAt && post.createdAt.toDate) {
+                        postDate = post.createdAt.toDate().toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric'
+                        });
+                    }
+                    metaElement.innerHTML = `Publicado em <time datetime="${post.createdAt.toDate().toISOString()}">${postDate}</time> &bull; ${post.tag}`;
+                    
+                    // Preencher Imagem
+                    imageContainer.innerHTML = `<img src="${post.imageUrl}" alt="${post.title}">`;
+                    
+                    // Preencher Conteúdo (usando .innerHTML para renderizar o HTML)
+                    contentContainer.innerHTML = post.content;
+
+                } else {
+                    console.log("No such document!");
+                    showError("Post não encontrado. (ID: " + postId + ")");
+                }
+
+            } catch (error) {
+                console.error("Erro ao carregar post:", error);
+                showError(`Erro ao carregar o post: ${error.message}`);
+            }
+        }
+
+        // Carregar o post quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', loadPost);
+    </script>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

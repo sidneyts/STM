@@ -37,7 +37,7 @@
     <main>
         <section id="hero" class="hero-section">
             <div class="container text-center">
-                <h1 class="hero-title">Motion Design</h1>
+                <h1 class="hero-title">ST Motion</h1>
                 <p class="hero-subtitle">A arte de dar vida às suas ideias.</p>
             </div>
         </section>
@@ -62,42 +62,15 @@
             </div>
         </section>
 
-        <!-- Seção do Blog Atualizada -->
+        <!-- Seção do Blog Dinâmica -->
         <section id="blog" class="blog-section">
             <div class="container">
                 <h2 class="section-title text-center">Fique por dentro</h2>
                 <p class="section-subtitle text-center">Minhas últimas notícias e artigos sobre o universo criativo.</p>
                 
-                <div class="blog-grid">
-                    <!-- Post 1 -->
-                    <a href="post1.html" class="blog-card">
-                        <img src="images/img1.jpg" alt="Homem de argila olhando para a câmera" class="blog-card-image">
-                        <div class="blog-card-content">
-                            <span class="blog-card-tag">Animação</span>
-                            <h3 class="blog-card-title">3 sites para quem quer se aventurar no mundo do Stop Motion</h3>
-                            <p class="blog-card-excerpt">Descubra três sites incríveis e gratuitos que são essenciais para animadores de stop motion...</p>
-                        </div>
-                    </a>
-
-                    <!-- Post 2 -->
-                    <a href="post2.html" class="blog-card">
-                        <img src="images/img2.jpg" alt="Tela do Photoshop com nova ferramenta de IA" class="blog-card-image">
-                        <div class="blog-card-content">
-                            <span class="blog-card-tag">Tecnologia</span>
-                            <h3 class="blog-card-title">Adobe Photoshop Beta e sua nova ferramenta de IA</h3>
-                            <p class="blog-card-excerpt">A nova função 'Generative Fill' do Adobe Photoshop (Beta) utiliza inteligência artificial...</p>
-                        </div>
-                    </a>
-
-                    <!-- Post 3 -->
-                    <a href="post3.html" class="blog-card">
-                        <img src="images/img3.jpg" alt="Robô humanoide desenhando em um tablet" class="blog-card-image">
-                        <div class="blog-card-content">
-                             <span class="blog-card-tag">Mercado</span>
-                            <h3 class="blog-card-title">IA impulsiona o mercado de animação até 2030</h3>
-                            <p class="blog-card-excerpt">A inteligência artificial está transformando a indústria da animação, com projeções indicando...</p>
-                        </div>
-                    </a>
+                <!-- O conteúdo do blog será carregado aqui -->
+                <div class="blog-grid" id="blog-grid-container">
+                    <p class="text-center" style="grid-column: 1 / -1;">Carregando posts...</p>
                 </div>
 
                 <div class="text-center">
@@ -131,7 +104,106 @@
         </label>
     </div>
 
+    <!-- Scripts do Firebase para carregar posts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, orderBy, limit, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuração do Firebase ---
+        // COLE SEU FIREBASE CONFIG AQUI
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFpllBhQW_jzj5u1og3fuX3Q3AZGX-_0w",
+            authDomain: "stmotion-9f307.firebaseapp.com",
+            projectId: "stmotion-9f307",
+            storageBucket: "stmotion-9f307.firebasestorage.app",
+            messagingSenderId: "529387031585",
+            appId: "1:529387031585:web:e05111eaa4435e3be92760",
+            measurementId: "G-JC7EGJXP1T"
+        };
+
+        // --- Variáveis Globais (Fornecidas pelo Ambiente) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const fbConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+
+        let db;
+        let dbPath;
+
+        // --- Função para Carregar Posts Recentes ---
+        async function loadRecentPosts() {
+            const grid = document.getElementById('blog-grid-container');
+            if (!grid) return;
+
+            try {
+                // Decidir qual configuração usar
+                const configToUse = fbConfigString ? JSON.parse(fbConfigString) : firebaseConfig;
+                if (!configToUse.apiKey) {
+                    grid.innerHTML = '<p class="text-center" style="grid-column: 1 / -1; color: var(--accent-primary);">Erro: Configuração do Firebase não encontrada.</p>';
+                    return;
+                }
+
+                // Inicializar Firebase
+                const app = initializeApp(configToUse);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+                setLogLevel('Debug');
+
+                // Autenticar
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                const userId = auth.currentUser?.uid || crypto.randomUUID();
+                dbPath = `artifacts/${appId}/public/data/posts`;
+
+                // Criar a query: 3 posts mais recentes
+                const postsRef = collection(db, dbPath);
+                const q = query(postsRef, orderBy("createdAt", "desc"), limit(3));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    grid.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">Nenhum post encontrado ainda.</p>';
+                    return;
+                }
+
+                // Limpar o "Carregando..."
+                grid.innerHTML = '';
+
+                // Criar os cards
+                querySnapshot.forEach(doc => {
+                    const post = doc.data();
+                    const postId = doc.id;
+
+                    // Criar um breve resumo (removendo tags HTML e truncando)
+                    const excerpt = post.content.replace(/<[^>]*>?/gm, '').substring(0, 100) + '...';
+
+                    const card = `
+                        <a href="post.html?id=${postId}" class="blog-card">
+                            <img src="${post.imageUrl}" alt="${post.title}" class="blog-card-image">
+                            <div class="blog-card-content">
+                                <span class="blog-card-tag">${post.tag}</span>
+                                <h3 class="blog-card-title">${post.title}</h3>
+                                <p class="blog-card-excerpt">${excerpt}</p>
+                            </div>
+                        </a>
+                    `;
+                    grid.innerHTML += card;
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar posts:", error);
+                grid.innerHTML = `<p class="text-center" style="grid-column: 1 / -1; color: var(--accent-primary);">Erro ao carregar posts: ${error.message}</p>`;
+            }
+        }
+
+        // Carregar os posts quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', loadRecentPosts);
+
+    </script>
+
     <script src="js/script.js"></script>
 </body>
 </html>
-

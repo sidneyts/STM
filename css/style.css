@@ -3,12 +3,12 @@
 /* ------------------- */
 :root {
     --bg-color: #1e1f22; --surface-color: #2a2b2e;
-    --text-primary: #ebe7d9; --text-secondary: rgba(235, 231, 217, 0.7);
+    --text-primary: #ffffff; --text-secondary: rgba(255, 255, 255, 0.7);
     --accent-primary: #f2513a; --accent-secondary: #30fc9f; --accent-tertiary: #1f52a6;
     --font-family: 'Inter', sans-serif; --header-height: 80px;
 }
 body.light-theme {
-    --bg-color: #ebe7d9; --surface-color: #ffffff;
+    --bg-color: #ffffff; --surface-color: #ffffff;
     --text-primary: #1e1f22; --text-secondary: rgba(30, 31, 34, 0.7);
     --accent-secondary: #1f52a6; --accent-tertiary: #1f52a6;
 }

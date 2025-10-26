@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - STM</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Carrega o CSS principal do site para consistência -->
+    <link rel="stylesheet" href="css/style.css"> 
+    
+    <style>
+        /* --- Reset e Layout Base do Admin --- */
+        body {
+            /* Garante que a rolagem do body principal seja desativada */
+            overflow: hidden; 
+        }
+
+        #login-section {
+            max-width: 450px;
+            margin: 10vh auto;
+            padding: 2rem;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #admin-portal {
+            display: none; /* Começa oculto */
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Barra Lateral --- */
+        .admin-sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--bg-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .admin-sidebar-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+        }
+        .admin-sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+        .admin-sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .admin-sidebar-nav a:hover {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+        .admin-sidebar-nav a.active {
+            background-color: var(--accent-tertiary);
+            color: #fff;
+        }
+        .admin-sidebar-nav a svg {
+            width: 20px;
+            height: 20px;
+        }
+        .admin-sidebar-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--bg-color);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .admin-sidebar-footer:hover { color: var(--accent-primary); }
+
+        /* --- Área de Conteúdo Principal --- */
+        .admin-content {
+            flex-grow: 1;
+            overflow-y: auto; /* Permite rolagem apenas no conteúdo */
+            padding: 2.5rem;
+        }
+
+        /* --- "Páginas" dentro do Conteúdo --- */
+        .admin-page {
+            display: none; /* Oculta todas as páginas por padrão */
+        }
+        .admin-page.active {
+            display: block; /* Mostra apenas a página ativa */
+            animation: fadeIn 0.3s ease-out;
+        }
+        .admin-page h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+        .admin-page h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            margin-top: 2.5rem;
+            color: var(--text-primary);
+        }
+        
+        /* --- Página: Dashboard --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .dashboard-card {
+            background-color: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dashboard-card-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .dashboard-card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+        }
+
+        /* --- Página: Gerenciamento (Toolbar e Lista) --- */
+        .admin-toolbar {
+            margin-bottom: 1.5rem;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--surface-color);
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            font-size: 1rem;
+        }
+        #posts-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .post-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            gap: 1rem;
+        }
+        .post-list-item-info { flex-grow: 1; overflow: hidden; }
+        .post-list-item-title {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .post-list-item-date { font-size: 0.85rem; color: var(--text-secondary); }
+        .post-list-item-actions { display: flex; gap: 0.75rem; flex-shrink: 0; }
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-edit { background-color: var(--accent-tertiary); color: #fff; }
+        .btn-edit:hover { background-color: #3370c9; }
+        .btn-delete { background-color: var(--accent-primary); color: #fff; }
+        .btn-delete:hover { background-color: #c93a27; }
+
+        /* --- Página: Editor de Post --- */
+        .form-container {
+            max-width: 800px;
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+        }
+        .admin-form-group { margin-bottom: 1.5rem; }
+        .admin-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .admin-input, .admin-textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--bg-color);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            font-size: 1rem;
+        }
+        .admin-textarea { min-height: 300px; resize: vertical; }
+        .admin-hint {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        .form-buttons { display: flex; gap: 1rem; align-items: center; }
+        .btn-submit {
+            background-color: var(--accent-primary);
+            color: #fff;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-submit:hover {
+            transform: scale(1.05);
+            background-color: var(--accent-secondary);
+        }
+        .btn-cancel { background-color: var(--text-secondary); color: var(--bg-color); }
+        .btn-cancel:hover { background-color: #999; }
+        #publish-status { margin-top: 1rem; font-weight: 600; color: var(--accent-secondary); }
+
+        /* --- Modal de Confirmação --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .modal-body { color: var(--text-secondary); margin-bottom: 2rem; }
+        .modal-body strong { color: var(--text-primary); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; }
+        
+        /* --- Login Form Styles --- */
+        #login-form .admin-form-group { margin-bottom: 1rem; }
+        #login-form .btn-submit { margin-top: 1rem; width: 100%; }
+        #login-error { color: var(--accent-primary); margin-top: 1rem; font-weight: 600; }
+        
+        /* --- Responsividade (Simplificada) --- */
+        @media (max-width: 768px) {
+            #admin-portal {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+            .admin-sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1rem;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            .admin-sidebar-header { margin: 0; font-size: 1.25rem; }
+            .admin-sidebar-nav {
+                flex-direction: row;
+                flex-grow: 0;
+            }
+            .admin-sidebar-nav a span { display: none; } /* Oculta texto, mostra só ícone */
+            .admin-sidebar-nav a { padding: 0.7rem; }
+            .admin-sidebar-footer { display: none; } /* Oculta rodapé no mobile */
+            
+            .admin-content { padding: 1.5rem; }
+            .admin-page h1 { font-size: 2rem; }
+            .admin-page h2 { font-size: 1.5rem; }
+            .post-list-item { flex-direction: column; align-items: flex-start; }
+            .post-list-item-actions { margin-top: 1rem; width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Seção de Login (Inicial) -->
+    <main id="login-section">
+        <h1 class="section-title text-center">STM Admin</h1>
+        <p class="section-subtitle text-center">Acesso restrito ao portal.</p>
+        <form id="login-form">
+            <div class="admin-form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" class="admin-input" required>
+            </div>
+            <button type="submit" class="btn-submit">Entrar</button>
+            <p id="login-error" class="text-center"></p>
+        </form>
+    </main>
+
+    <!-- Portal de Administração (Oculto por padrão) -->
+    <div id="admin-portal" style="display: none;">
+        
+        <!-- Barra Lateral Fixa -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">STM Admin</div>
+            <nav class="admin-sidebar-nav">
+                <a href="#" id="nav-dashboard-link" class="active">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" id="nav-new-post-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    <span>Adicionar Post</span>
+                </a>
+            </nav>
+            <a href="index.html" class="admin-sidebar-footer">Voltar ao Site &rarr;</a>
+        </aside>
+
+        <!-- Área de Conteúdo Principal -->
+        <main class="admin-content">
+            
+            <!-- Página 1: Dashboard e Gerenciamento -->
+            <section id="page-dashboard" class="admin-page active">
+                <h1>Dashboard</h1>
+                
+                <!-- Painel de Dados -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-title">Total de Posts</div>
+                        <div class="dashboard-card-value" id="total-posts-value">0</div>
+                    </div>
+                    <!-- Outros cards de estatísticas podem ser adicionados aqui -->
+                </div>
+                
+                <h2>Gerenciar Posts</h2>
+                
+                <!-- Toolbar com Pesquisa -->
+                <div class="admin-toolbar">
+                    <input type="text" id="search-bar" class="search-bar" placeholder="Pesquisar posts por título...">
+                </div>
+                
+                <!-- Lista de Posts -->
+                <div id="posts-list-container">
+                    <p>Carregando posts...</p>
+                </div>
+            </section>
+
+            <!-- Página 2: Editor de Post -->
+            <section id="page-post-editor" class="admin-page">
+                <h1 id="form-title">Adicionar Novo Post</h1>
+                
+                <div class="form-container">
+                    <form id="post-form">
+                        <input type="hidden" id="post-id-hidden"> <!-- Para guardar o ID na edição -->
+                        
+                        <div class="admin-form-group">
+                            <label for="post-title">Título do Post:</label>
+                            <input type="text" id="post-title" class="admin-input" required>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label for="post-tag">Tag:</label>
+                            <input type="text" id="post-tag" class="admin-input" placeholder="Ex: Animação, Tecnologia" required>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label for="post-image-url">URL da Imagem de Capa:</label>
+                            <input type="url" id="post-image-url" class="admin-input" placeholder="https://imgur.com/link.jpg" required>
+                            <p class="admin-hint">Hospede sua imagem (ex: Imgur) e cole o link direto aqui.</p>
+                        </div>
+
+                        <div class="admin-form-group">
+                            <label for="post-content">Conteúdo do Post:</label>
+                            <textarea id="post-content" class="admin-textarea" required></textarea>
+                            <p class="admin-hint">Pode usar tags HTML básicas (&lt;h2&gt;, &lt;p&gt;, &lt;b&gt;, &lt;a href="..."&gt;).</p>
+                        </div>
+                        
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit" id="submit-button">Publicar Post</button>
+                            <button type="button" class="btn-action btn-cancel" id="cancel-edit-button" style="display: none;">Cancelar</button>
+                        </div>
+                        <p id="publish-status"></p>
+                    </form>
+                </div>
+            </section>
+            
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Confirmar Exclusão</h3>
+            <p class="modal-body">Tem certeza que deseja excluir o post "<strong><span id="post-title-to-delete"></span></strong>"? Esta ação é irreversível.</p>
+            <div class="modal-actions">
+                <button class="btn-action btn-cancel" id="cancel-delete-button">Cancelar</button>
+                <button class="btn-action btn-delete" id="confirm-delete-button" data-id-to-delete="">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts do Firebase -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, 
+            serverTimestamp, onSnapshot, query, orderBy, getDoc, setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuração do Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFpllBhQW_jzj5u1og3fuX3Q3AZGX-_0w",
+            authDomain: "stmotion-9f307.firebaseapp.com",
+            projectId: "stmotion-9f307",
+            storageBucket: "stmotion-9f307.firebasestorage.app",
+            messagingSenderId: "529387031585",
+            appId: "1:529387031585:web:e05111eaa4435e3be92760",
+            measurementId: "G-JC7EGJXP1T"
+        };
+
+        // --- Variáveis Globais (Fornecidas pelo Ambiente) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const fbConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+
+        // --- Variáveis de Estado ---
+        let app, auth, db, userId, dbPath;
+        let allPostsCache = []; // Cache para a pesquisa
+        let currentEditingId = null; // Guarda o ID do post sendo editado
+
+        // --- Elementos do DOM (Portal) ---
+        const loginSection = document.getElementById('login-section');
+        const adminPortal = document.getElementById('admin-portal');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        
+        // --- Elementos do DOM (Páginas) ---
+        const pages = {
+            dashboard: document.getElementById('page-dashboard'),
+            editor: document.getElementById('page-post-editor')
+        };
+        const navLinks = {
+            dashboard: document.getElementById('nav-dashboard-link'),
+            editor: document.getElementById('nav-new-post-link')
+        };
+        
+        // --- Elementos do DOM (Dashboard) ---
+        const totalPostsValue = document.getElementById('total-posts-value');
+        const searchBar = document.getElementById('search-bar');
+        const postsListContainer = document.getElementById('posts-list-container');
+
+        // --- Elementos do DOM (Editor) ---
+        const postForm = document.getElementById('post-form');
+        const formTitle = document.getElementById('form-title');
+        const submitButton = document.getElementById('submit-button');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
+        const hiddenPostId = document.getElementById('post-id-hidden');
+        const publishStatus = document.getElementById('publish-status');
+        
+        // --- Elementos do DOM (Modal) ---
+        const deleteModal = document.getElementById('delete-modal');
+        const postTitleToDelete = document.getElementById('post-title-to-delete');
+        const cancelDeleteButton = document.getElementById('cancel-delete-button');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+
+        // --- 1. Lógica de Inicialização e Login ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const ADMIN_PASSWORD = "admin"; // Senha simples
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const password = document.getElementById('password').value;
+
+                if (password === ADMIN_PASSWORD) {
+                    showLoginError("Autenticando...");
+                    const success = await initializeFirebase();
+                    if (success) {
+                        loginSection.style.display = 'none';
+                        adminPortal.style.display = 'flex';
+                        initializePortalListeners(); // Configura a navegação do portal
+                        loadDashboardData(); // Carrega os dados
+                    }
+                } else {
+                    showLoginError("Senha incorreta.");
+                }
+            });
+        });
+
+        async function initializeFirebase() {
+            try {
+                const configToUse = fbConfigString ? JSON.parse(fbConfigString) : firebaseConfig;
+                if (!configToUse.apiKey) {
+                    showLoginError("Erro: Configuração do Firebase não encontrada.");
+                    return false;
+                }
+                
+                app = initializeApp(configToUse);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                setLogLevel('Debug');
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                dbPath = `artifacts/${appId}/public/data/posts`;
+                
+                console.log("Firebase inicializado. Auth pronto. DB Path:", dbPath);
+                return true; // Sucesso
+
+            } catch (error) {
+                console.error("Erro ao inicializar o Firebase:", error);
+                showLoginError(`Erro de inicialização: ${error.message}`);
+                return false;
+            }
+        }
+        
+        function showLoginError(message) {
+            loginError.textContent = message;
+        }
+
+        // --- 2. Lógica de Navegação do Portal ---
+
+        function initializePortalListeners() {
+            navLinks.dashboard.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPage('dashboard');
+            });
+            
+            navLinks.editor.addEventListener('click', (e) => {
+                e.preventDefault();
+                resetForm(); // Garante que é um *novo* post
+                showPage('editor');
+            });
+            
+            searchBar.addEventListener('input', () => {
+                renderPostsList(allPostsCache); // Filtra a lista local
+            });
+            
+            postForm.addEventListener('submit', handleFormSubmit);
+            cancelEditButton.addEventListener('click', () => {
+                resetForm();
+                showPage('dashboard');
+            });
+
+            // Lógica do Modal
+            cancelDeleteButton.addEventListener('click', closeDeleteModal);
+            confirmDeleteButton.addEventListener('click', () => {
+                const postId = confirmDeleteButton.dataset.idToDelete;
+                deletePostFromFirestore(postId);
+            });
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) closeDeleteModal();
+            });
+        }
+
+        function showPage(pageName) {
+            // Oculta todas as páginas
+            Object.values(pages).forEach(page => page.classList.remove('active'));
+            // Remove 'active' de todos os links
+            Object.values(navLinks).forEach(link => link.classList.remove('active'));
+            
+            // Mostra a página e o link selecionados
+            if (pages[pageName] && navLinks[pageName]) {
+                pages[pageName].classList.add('active');
+                navLinks[pageName].classList.add('active');
+            } else if (pageName === 'editor') {
+                // Caso especial para "editar", que não tem link de nav próprio
+                pages.editor.classList.add('active');
+                navLinks.editor.classList.add('active');
+            }
+            
+            // Limpa o status ao trocar de página
+            publishStatus.textContent = "";
+        }
+
+        // --- 3. Lógica de Carregamento de Dados (Leitura) ---
+
+            function loadDashboardData() {
+                if (!db) return;
+                
+                // REMOVIDO: orderBy("createdAt", "desc")
+                // Isto garante que posts antigos sem data de criação sejam incluídos.
+                const postsQuery = query(collection(db, dbPath));
+                
+                onSnapshot(postsQuery, (querySnapshot) => {
+                    
+                    // ADICIONADO: Ordenação manual no lado do cliente (JavaScript)
+                    // Ordena os posts, colocando os sem data no final.
+                    const sortedDocs = querySnapshot.docs.sort((a, b) => {
+                        const postA = a.data();
+                        const postB = b.data();
+                        
+                        // Usa a data de criação, ou 0 se não existir
+                        const timeA = postA.createdAt?.toDate()?.getTime() || 0;
+                        const timeB = postB.createdAt?.toDate()?.getTime() || 0;
+                        
+                        // Ordena do mais novo (maior time) para o mais antigo (menor time)
+                        return timeB - timeA;
+                    });
+
+                    // 1. Atualiza o cache de posts com a lista ordenada
+                    allPostsCache = sortedDocs;
+                    
+                    // 2. Atualiza o Painel de Dados
+                    totalPostsValue.textContent = querySnapshot.size;
+
+                    // 3. Renderiza a Lista (respeitando a pesquisa)
+                    renderPostsList(allPostsCache);
+
+                }, (error) => {
+                    console.error("Erro ao ouvir posts:", error);
+                    postsListContainer.innerHTML = `<p style="color: var(--accent-primary);">Erro ao carregar posts.</p>`;
+                });
+            }
+
+        function renderPostsList(docs) {
+            const searchTerm = searchBar.value.toLowerCase();
+            
+            if (docs.length === 0) {
+                postsListContainer.innerHTML = "<p>Nenhum post publicado ainda.</p>";
+                return;
+            }
+
+            postsListContainer.innerHTML = ""; // Limpar lista
+            let postsFound = 0;
+            
+            docs.forEach(doc => {
+                const post = doc.data();
+                const postId = doc.id;
+                const postTitle = post.title.toLowerCase();
+
+                // Filtro de Pesquisa
+                if (postTitle.includes(searchTerm)) {
+                    postsFound++;
+                    const postDate = post.createdAt?.toDate()
+                        ? post.createdAt.toDate().toLocaleDateString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                        : 'Data incerta';
+
+                    const item = document.createElement('div');
+                    item.className = 'post-list-item';
+                    item.innerHTML = `
+                        <div class="post-list-item-info">
+                            <div class="post-list-item-title" title="${post.title}">${post.title}</div>
+                            <div class="post-list-item-date">Publicado em: ${postDate}</div>
+                        </div>
+                        <div class="post-list-item-actions">
+                            <button class="btn-action btn-edit" data-id="${postId}">Editar</button>
+                            <button class="btn-action btn-delete" data-id="${postId}" data-title="${post.title}">Excluir</button>
+                        </div>
+                    `;
+                    postsListContainer.appendChild(item);
+                }
+            });
+            
+            if (postsFound === 0 && docs.length > 0) {
+                postsListContainer.innerHTML = "<p>Nenhum post encontrado com esse termo.</p>";
+            }
+
+            // Adicionar listeners aos botões criados
+            addListActionListeners();
+        }
+
+        function addListActionListeners() {
+            postsListContainer.querySelectorAll('.btn-edit').forEach(button => {
+                button.addEventListener('click', handleEditClick);
+            });
+            postsListContainer.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', handleDeleteClick);
+            });
+        }
+        
+        // --- 4. Lógica de CRUD (Criar, Editar, Excluir) ---
+        
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const editingPostId = currentEditingId;
+            
+            publishStatus.textContent = editingPostId ? "Atualizando post..." : "Publicando...";
+            if (!db) {
+                publishStatus.textContent = "Erro: Banco de dados não inicializado.";
+                return;
+            }
+
+            const postData = {
+                title: document.getElementById('post-title').value,
+                tag: document.getElementById('post-tag').value,
+                imageUrl: document.getElementById('post-image-url').value,
+                content: document.getElementById('post-content').value,
+                updatedAt: serverTimestamp() // Sempre atualiza a data de modificação
+            };
+
+            try {
+                if (editingPostId) {
+                    // --- Atualizar Post Existente ---
+                    const docRef = doc(db, dbPath, editingPostId);
+                    await updateDoc(docRef, postData);
+                    publishStatus.textContent = "Post atualizado com sucesso!";
+                } else {
+                    // --- Criar Novo Post ---
+                    postData.createdAt = serverTimestamp(); // Adiciona data de criação
+                    await addDoc(collection(db, dbPath), postData);
+                    publishStatus.textContent = "Post publicado com sucesso!";
+                }
+                
+                resetForm();
+                setTimeout(() => showPage('dashboard'), 1000); // Volta pro dashboard
+
+            } catch (error) {
+                console.error("Erro ao salvar post:", error);
+                publishStatus.textContent = `Erro ao salvar: ${error.message}`;
+            }
+        }
+        
+        async function handleEditClick(e) {
+            const postId = e.target.dataset.id;
+            if (!postId) return;
+
+            try {
+                const docRef = doc(db, dbPath, postId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const post = docSnap.data();
+                    
+                    // Preencher o formulário
+                    document.getElementById('post-title').value = post.title;
+                    document.getElementById('post-tag').value = post.tag;
+                    document.getElementById('post-image-url').value = post.imageUrl;
+                    document.getElementById('post-content').value = post.content;
+                    currentEditingId = postId; // Guardar o ID!
+
+                    // Mudar UI do formulário
+                    formTitle.textContent = "Editar Post";
+                    submitButton.textContent = "Salvar Alterações";
+                    cancelEditButton.style.display = "inline-block";
+                    
+                    showPage('editor');
+                    window.scrollTo(0, 0); // Rola para o topo da página do editor
+                }
+            } catch (error) {
+                console.error("Erro ao carregar post para edição:", error);
+                publishStatus.textContent = `Erro: ${error.message}`;
+            }
+        }
+        
+        function resetForm() {
+            postForm.reset();
+            currentEditingId = null;
+            formTitle.textContent = "Adicionar Novo Post";
+            submitButton.textContent = "Publicar Post";
+            cancelEditButton.style.display = "none";
+            publishStatus.textContent = "";
+        }
+
+        function handleDeleteClick(e) {
+            const postId = e.target.dataset.id;
+            const postTitle = e.target.dataset.title;
+            
+            postTitleToDelete.textContent = postTitle;
+            confirmDeleteButton.dataset.idToDelete = postId;
+            deleteModal.classList.add('active');
+        }
+        
+        async function deletePostFromFirestore(postId) {
+            if (!postId || !db) return;
+            try {
+                await deleteDoc(doc(db, dbPath, postId));
+                console.log("Post excluído:", postId);
+            } catch (error) {
+                console.error("Erro ao excluir post:", error);
+            } finally {
+                closeDeleteModal();
+            }
+        }
+        
+        function closeDeleteModal() {
+            deleteModal.classList.remove('active');
+            postTitleToDelete.textContent = "";
+            confirmDeleteButton.dataset.idToDelete = "";
+        }
+
+    </script>
+    
+    <!-- Script existente do site (tema/menu mobile) não é necessário aqui,
+         mas não removemos para não quebrar o arquivo `js/script.js` se ele for chamado. -->
+    <!-- <script src="js/script.js"></script> --> 
+</body>
+</html>
+
