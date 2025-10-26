@@ -670,26 +670,39 @@
             
             docs.forEach(doc => {
                 const post = doc.data();
+                // Verificação de segurança: ignora documentos sem dados
+                if (!post) return; 
+                
                 const postId = doc.id;
-                const postTitle = post.title.toLowerCase();
+                
+                // --- CORREÇÃO ---
+                // Define um título padrão se 'post.title' não existir
+                // Isto previne que o loop quebre por causa de posts antigos/incompletos
+                const postTitle = post.title ? post.title : "[Post Sem Título]";
+                const postTitleLower = postTitle.toLowerCase();
+                // --- FIM DA CORREÇÃO ---
 
                 // Filtro de Pesquisa
-                if (postTitle.includes(searchTerm)) {
+                if (postTitleLower.includes(searchTerm)) {
                     postsFound++;
+                    
+                    // A verificação de data já é segura (usa optional chaining ?. )
                     const postDate = post.createdAt?.toDate()
                         ? post.createdAt.toDate().toLocaleDateString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
                         : 'Data incerta';
 
                     const item = document.createElement('div');
                     item.className = 'post-list-item';
+                    
+                    // Usar a variável segura 'postTitle'
                     item.innerHTML = `
                         <div class="post-list-item-info">
-                            <div class="post-list-item-title" title="${post.title}">${post.title}</div>
+                            <div class="post-list-item-title" title="${postTitle}">${postTitle}</div>
                             <div class="post-list-item-date">Publicado em: ${postDate}</div>
                         </div>
                         <div class="post-list-item-actions">
                             <button class="btn-action btn-edit" data-id="${postId}">Editar</button>
-                            <button class="btn-action btn-delete" data-id="${postId}" data-title="${post.title}">Excluir</button>
+                            <button class="btn-action btn-delete" data-id="${postId}" data-title="${postTitle}">Excluir</button>
                         </div>
                     `;
                     postsListContainer.appendChild(item);
