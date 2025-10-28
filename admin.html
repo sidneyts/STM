@@ -619,45 +619,45 @@
 
         // --- 3. Lógica de Carregamento de Dados (Leitura) ---
 
-            function loadDashboardData() {
-                if (!db) return;
+        function loadDashboardData() {
+            if (!db) return;
+            
+            // REMOVIDO: orderBy("createdAt", "desc")
+            // Isto garante que posts antigos sem data de criação sejam incluídos.
+            const postsQuery = query(collection(db, dbPath));
+            
+            onSnapshot(postsQuery, (querySnapshot) => {
                 
-                // REMOVIDO: orderBy("createdAt", "desc")
-                // Isto garante que posts antigos sem data de criação sejam incluídos.
-                const postsQuery = query(collection(db, dbPath));
-                
-                onSnapshot(postsQuery, (querySnapshot) => {
+                // ADICIONADO: Ordenação manual no lado do cliente (JavaScript)
+                // Ordena os posts, colocando os sem data no final.
+                const sortedDocs = querySnapshot.docs.sort((a, b) => {
+                    const postA = a.data();
+                    const postB = b.data();
                     
-                    // ADICIONADO: Ordenação manual no lado do cliente (JavaScript)
-                    // Ordena os posts, colocando os sem data no final.
-                    const sortedDocs = querySnapshot.docs.sort((a, b) => {
-                        const postA = a.data();
-                        const postB = b.data();
-                        
-                        // Usa a data de criação, ou 0 se não existir
-                        const timeA = postA.createdAt?.toDate()?.getTime() || 0;
-                        const timeB = postB.createdAt?.toDate()?.getTime() || 0;
-                        
-                        // Ordena do mais novo (maior time) para o mais antigo (menor time)
-                        return timeB - timeA;
-                    });
-
-                    // 1. Atualiza o cache de posts com a lista ordenada
-                    allPostsCache = sortedDocs;
+                    // Usa a data de criação, ou 0 se não existir
+                    const timeA = postA.createdAt?.toDate()?.getTime() || 0;
+                    const timeB = postB.createdAt?.toDate()?.getTime() || 0;
                     
-                    // 2. Atualiza o Painel de Dados
-                    totalPostsValue.textContent = querySnapshot.size;
-
-                    // 3. Renderiza a Lista (respeitando a pesquisa)
-                    renderPostsList(allPostsCache);
-
-                }, (error) => {
-                    console.error("Erro ao ouvir posts:", error);
-                    postsListContainer.innerHTML = `<p style="color: var(--accent-primary);">Erro ao carregar posts.</p>`;
+                    // Ordena do mais novo (maior time) para o mais antigo (menor time)
+                    return timeB - timeA;
                 });
-            }
 
-        function renderPostsList(docs) {
+                // 1. Atualiza o cache de posts com a lista ordenada
+                allPostsCache = sortedDocs;
+                
+                // 2. Atualiza o Painel de Dados
+                totalPostsValue.textContent = querySnapshot.size;
+
+                // 3. Renderiza a Lista (respeitando a pesquisa)
+                renderPostsList(allPostsCache);
+
+            }, (error) => {
+                console.error("Erro ao ouvir posts:", error);
+                postsListContainer.innerHTML = `<p style="color: var(--accent-primary);">Erro ao carregar posts.</p>`;
+            });
+        }
+
+                function renderPostsList(docs) {
             const searchTerm = searchBar.value.toLowerCase();
             
             if (docs.length === 0) {
@@ -669,48 +669,57 @@
             let postsFound = 0;
             
             docs.forEach(doc => {
-                const post = doc.data();
-                // Verificação de segurança: ignora documentos sem dados
-                if (!post) return; 
-                
-                const postId = doc.id;
-                
-                // --- CORREÇÃO ---
-                // Define um título padrão se 'post.title' não existir
-                // Isto previne que o loop quebre por causa de posts antigos/incompletos
-                const postTitle = post.title ? post.title : "[Post Sem Título]";
-                const postTitleLower = postTitle.toLowerCase();
-                // --- FIM DA CORREÇÃO ---
-
-                // Filtro de Pesquisa
-                if (postTitleLower.includes(searchTerm)) {
-                    postsFound++;
+                // --- INÍCIO DA CORREÇÃO (try...catch) ---
+                try {
+                    const post = doc.data();
+                    // Verificação de segurança: ignora se o post for nulo
+                    if (!post) return; 
                     
-                    // A verificação de data já é segura (usa optional chaining ?. )
-                    const postDate = post.createdAt?.toDate()
-                        ? post.createdAt.toDate().toLocaleDateString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
-                        : 'Data incerta';
-
-                    const item = document.createElement('div');
-                    item.className = 'post-list-item';
+                    const postId = doc.id;
                     
-                    // Usar a variável segura 'postTitle'
-                    item.innerHTML = `
-                        <div class="post-list-item-info">
-                            <div class="post-list-item-title" title="${postTitle}">${postTitle}</div>
-                            <div class="post-list-item-date">Publicado em: ${postDate}</div>
-                        </div>
-                        <div class="post-list-item-actions">
-                            <button class="btn-action btn-edit" data-id="${postId}">Editar</button>
-                            <button class="btn-action btn-delete" data-id="${postId}" data-title="${postTitle}">Excluir</button>
-                        </div>
-                    `;
-                    postsListContainer.appendChild(item);
+                    // --- CORREÇÃO APLICADA (String() wrapper) ---
+                    // Força o título a ser uma string, mesmo que seja um número ou nulo.
+                    const postTitleStr = String(post.title || "[Post Sem Título]"); 
+                    const postTitleLower = postTitleStr.toLowerCase();
+                    // --- FIM DA CORREÇÃO ---
+
+                    // Filtro de Pesquisa
+                    if (postTitleLower.includes(searchTerm)) {
+                        postsFound++;
+                        
+                        // A verificação de data já é segura (usa optional chaining ?. )
+                        const postDate = post.createdAt?.toDate()
+                            ? post.createdAt.toDate().toLocaleDateString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                            : 'Data incerta';
+
+                        const item = document.createElement('div');
+                        item.className = 'post-list-item';
+                        
+                        // Usar a variável segura 'postTitleStr'
+                        item.innerHTML = `
+                            <div class="post-list-item-info">
+                                <div class="post-list-item-title" title="${postTitleStr}">${postTitleStr}</div>
+                                <div class="post-list-item-date">Publicado em: ${postDate}</div>
+                            </div>
+                            <div class="post-list-item-actions">
+                                <button class="btn-action btn-edit" data-id="${postId}">Editar</button>
+                                <button class="btn-action btn-delete" data-id="${postId}" data-title="${postTitleStr}">Excluir</button>
+                            </div>
+                        `;
+                        postsListContainer.appendChild(item);
+                    }
+                } catch (error) {
+                    // Se um post falhar (ex: dados corrompidos), ele será ignorado
+                    // e o erro será impresso no console, mas o loop continuará.
+                    console.warn(`Não foi possível renderizar o post: ${doc.id}`, error);
                 }
-            });
+                // --- FIM DA CORREÇÃO (try...catch) ---
+            }); // Fim do docs.forEach
             
             if (postsFound === 0 && docs.length > 0) {
                 postsListContainer.innerHTML = "<p>Nenhum post encontrado com esse termo.</p>";
+            } else if (postsFound === 0 && docs.length === 0) {
+                 postsListContainer.innerHTML = "<p>Nenhum post publicado ainda.</p>";
             }
 
             // Adicionar listeners aos botões criados
@@ -780,10 +789,10 @@
                     const post = docSnap.data();
                     
                     // Preencher o formulário
-                    document.getElementById('post-title').value = post.title;
-                    document.getElementById('post-tag').value = post.tag;
-                    document.getElementById('post-image-url').value = post.imageUrl;
-                    document.getElementById('post-content').value = post.content;
+                    document.getElementById('post-title').value = post.title || ''; // Adiciona fallback
+                    document.getElementById('post-tag').value = post.tag || ''; // Adiciona fallback
+                    document.getElementById('post-image-url').value = post.imageUrl || ''; // Adiciona fallback
+                    document.getElementById('post-content').value = post.content || ''; // Adiciona fallback
                     currentEditingId = postId; // Guardar o ID!
 
                     // Mudar UI do formulário
